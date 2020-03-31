@@ -3,3 +3,4 @@ __pycache__/*
 envapi/*
 main.py
 .gitignore
+cache/*
