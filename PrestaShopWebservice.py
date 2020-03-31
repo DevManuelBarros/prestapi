@@ -1,7 +1,12 @@
+#Imports generales
 import requests
 import os.path
 import json
+import dicttoxml
+
 from xml.etree import ElementTree
+
+#Imports particulares
 from const_rel import relations
 
 class PrestaShopWebservice:
@@ -14,24 +19,21 @@ class PrestaShopWebservice:
     @debug : (bool) Informa si debug esta activo, por defecto es True \n
     """
     def __init__(self, host, key, protocol="http", debug=True):
-        #string Shop url
-        self.host = host
-        #string Authentification key
-        self.key = key
-        #boolean is debug activated
-        self.debug = debug
-        #string PS version
-        self.version = 'unknown'
-        #default settings headers
+        self.host = host                #El host donde esta alojado la API
+        self.key = key                  #key que entrega PrestaShop cuando la generamos
+        self.debug = debug              #Si esta en modo debug o no
+        self.version = 'unknown'        #Versión de la api de prestashop
+        #configuracion por defector de la cabecera de las peticiones realizadas
         self.default_headers = {
                                 'Io-Format' : '',
                                 'Output-Format' : '',
-                                'User-Agent': 'PrestaShopWebservice.py by Manuel Barros',
+                                'User-Agent': 'Prestapi.py by Manuel Barros',
                               }
-        #default settings params
+        #default settings son los parametros que casi siempre se necesitaran
         self.default_params = {'resource':'',
                                 'id':'',
                                 'schema' : ''}
+        #Otros parametros que podemos utilizar para para obtener datos, etc.
         self.other_params = {
                             'filter' : '',
                             'sort' : '',
@@ -39,13 +41,11 @@ class PrestaShopWebservice:
                             'id_shop' : '',
                             'id_group_shop' : ''
                             }
-        #Min. Version compatible with this module
-        self.psCompatibleVersionsMin = '1.7.0.0'
-        #Max. Version compatible with this module
-        self.psCompatibleVersionsMax = '1.7.99.99'
-        self.protocol = protocol + "://"
-        self.dir_cache = "cache/"
-        self.define_json()
+        self.psCompatibleVersionsMin = '1.7.0.0'            #La minima versión comprobada que funciona con esta APP
+        self.psCompatibleVersionsMax = '1.7.99.99'          #La maxima versión comprobada que funciona con esta APP
+        self.protocol = protocol + "://"                    #creamos la cadena para el protocolo
+        self.dir_cache = "cache/"                           #configuracion de la carpeta que hara de cache
+        self.define_json()                                  #le asignamos valores por defecto a la cabecera sobre entrada y salida de datos.
 
     """
     def checkStatusCode: Control del estado de las peticiones.
@@ -77,31 +77,34 @@ class PrestaShopWebservice:
     @add : (bool) si estan en True, como por defecto, agrega al diccionario o en caso contrario modifica totalmente la cabecera\n
     """
     def change_params(self, params={}, add=True):
-        if add == True:
-            for k, v in params.items():
-                self.default_params[k] = v
+        if add == True:                         #Comprobamos si hay que agregar o crear nuevos parametros
+            for k, v in params.items():         #recorremos los parametros pasados como args.
+                self.default_params[k] = v      #los agregamos a los que ya existen
         else:
-            self.default_params = params
+            self.default_params = params        #simplemente reemplazamos los parametros
         return self.default_params
+    
     """
     def change_headers: Agrega o cambia totalmente los parametros
     ---\n
-    @params : (dict) Los parametros a agregar o colocar dentro del diccionario por default\n
+    @headers : (dict) Los parametros a agregar o colocar dentro del diccionario por default\n
     @add : (bool) si estan en True, como por defecto, agrega al diccionario o en caso contrario modifica totalmente la cabecera\n
     """
     def change_headers(self, headers={}, add=True):
-        if add == True:
-            for k, v in headers.items():
-                self.default_headers[k] = v
+        if add == True:                             #Comprobamos si hay que agregar o crear nuevos parametros
+            for k, v in headers.items():            #recorremos los parametros pasados como args.
+                self.default_headers[k] = v         #los agregamos a los que ya existen
         else:
-            self.default_headers = headers
+            self.default_headers = headers          #simplemente reemplazamos los parametros
         return self.default_headers
     
     """
     def executeRequest: Metodo interno para terminar de ejecutar la peticion con requests
     ---\n
+    @metod = (str) Aqui sugerimos que metodo se realizara. GET, POST, etc.
+    @url   = (str) La url por defecto estara en False, pero se puede pasar y no se construye.
     """
-    def executeRequest(self,  method='GET', url=False):
+    def executeRequest(self,  method='GET', data=False, url=False):
         if url == False:
             url_full = self.make_full_url()
         else:
@@ -110,18 +113,30 @@ class PrestaShopWebservice:
         req = requests.Request(method, 
                                url_full,
                                headers=self.default_headers,
+                               data=data,
                                auth=(self.key,'')
                                )
         response = session.send(req.prepare(), verify=True)
         return response
 
-
+    """
+    def set_params_get: para setear los parametros.
+    \n
+    @resource : (str)
+    @id : (str)
+    @schema : (str)
+    """
     def set_params_get(self, resource=False, id=False, schema=False):
+        #Todos los args son opcionales, si no se coloca nada borrara los valores.j
+        #en caso de que se envien valores se modificaran.
         self.default_params['resource'] = resource if resource != False else ''
         self.default_params['id'] = id if id != False else ''
         self.default_params['schema'] = schema if schema != False else ''
 
-
+    """
+    def make_param:
+    \n
+    """
     def make_param(self):
         other_params = ""
         for k, v in self.other_params.items():
@@ -130,7 +145,10 @@ class PrestaShopWebservice:
         other_params = other_params.strip()
         return other_params[:-1]
 
-
+    """
+    def make_full_url:
+    \n
+    """
     def make_full_url(self):
         #Controlamos que la parte 
         url = self.protocol + self.host if not(self.protocol in self.host) else self.host
@@ -147,65 +165,117 @@ class PrestaShopWebservice:
             url = url + "?" + new_param if new_param != '' else url 
         return str(url)
 
+
+    """
+    def define_json: 
+    Esto definira las valores de la cabecera sobre la entrada y salida de datos, por defecto
+    se realizara con JSON, es decir si no se pasan argumentos.
+    \n
+    @type_json : (bool) si es True el tipo de archivo de salida y entrada sera Json, 
+    caso contrario sera XML
+    """
     def define_json(self, type_json=True):
         if type_json==True:
             self.default_headers['Output-Format'] = 'JSON'
             self.default_headers['Io-Format'] = 'JSON'
+            #self.default_headers['Content-Type'] = 'application/json'
         else:
             self.default_headers['Output-Format'] = 'XML'
             self.default_headers['Io-Format'] = 'XML'
+            self.default_headers['Content-Type'] = 'text/xml'
 
-    def get_id_name(self, rel_field):
-        tmpRel = relations() #obtenemos el diccionario con los datos para recuperar
-        new_resource = tmpRel.relations[rel_field]
+
+
+    #
+    #-------------- ADD ----------------
+    #Sector para el agregado de valores.
+    #-----------------------------------
+
+
+    def get_id_name(self, resource, name):
+        update = True
         self.define_json() #definimos el tipo de pedido que vamos a realizar
-        self.set_params_get(resource=new_resource[0])
-        rec = self.executeRequest().json()[new_resource[0]]
-        path = self.dir_cache + new_resource[0]+ ".json"
-        if os.path.isfile(path):
-            cmp_json = json.load(open(path, "r"))
-            if cmp_json == rec:
-                print("Es igual")
-            else:
-                print("No es igual")
+        self.set_params_get(resource=resource)
+        rec = self.executeRequest()
+        if len(rec.json()) > 0:
+            rec = rec.json()[resource]
         else:
-            file_object = open(path, "w")
-            json.dump(rec, file_object)
+            update = False
+        if update == True:
+            path = self.dir_cache + resource + ".json"
+            if os.path.isfile(path):
+                cmp_json = json.load(open(path, "r"))
+                if cmp_json == rec:
+                    update = False
+                else:
+                    file_object = open(path, "w")
+                    json.dump(rec, file_object)
+            else:
+                file_object = open(path, "w")
+                json.dump(rec, file_object)
+            path_detail = self.dir_cache + resource + "Detail" + ".json"
+            if update:
+                id_name = {}
+                for ix in rec:
+                    self.set_params_get(resource=resource, id=str(ix['id']))
+                    new_rec = self.executeRequest().json()
+                    if "," in name:
+                        fullName = ""
+                        arrayName = name.split(",")
+                        for tmpName in arrayName:
+                            fullName += new_rec[str(list(new_rec)[0])][tmpName] + " "
+                        id_name[str(ix['id'])] = fullName[:-1]    
+                    else:    
+                        id_name[str(ix['id'])] = new_rec[str(list(new_rec)[0])][name]
+                file_object = open(path_detail, "w")
+                json.dump(id_name, file_object)
+            else:
+                id_name = json.load(open(path_detail, "r"))
+        else:
+            id_name = {'1' : 'No data found'}
+        return id_name
 
-        """
-        for ix in rec:
-            self.set_params_get(resource=new_resource[0],id=str(ix['id']))
-            new_rec = self.executeRequest().json()  
-            print(new_rec[str(list(new_rec)[0])]['name'])
-        """
     
-    
-    def get_rules_dict(self, resource, tStruct):
+    def get_rules_dict(self, tStruct):
         mido = ElementTree.fromstring(tStruct)
         result = {}
         for node in mido.iter():
-            if node.tag != 'prestashop' and node.tag != resource:
+            if node.tag != 'prestashop':
                 dicto = node.attrib
                 result[str(node.tag)] = dicto
+        del result[list(result)[0]]
         return result
+
+
 
     def get_add(self, resource, rec_id=True):
         self.define_json()
         self.set_params_get(resource=resource, schema='blank')
-        struct = self.executeRequest()
-        struct = struct.json()
-        struct = struct[list(struct.keys())[0]]
+        struct = self.executeRequest().json()
+        struct = struct[list(struct)[0]]
         self.define_json(type_json=False)
         self.set_params_get(resource=resource, schema='synopsis')
         tStruct = self.executeRequest()
-        tStruct = self.get_rules_dict(resource=resource, tStruct=tStruct.text)
+        tStruct = self.get_rules_dict(tStruct=tStruct.text)
         tmp = {}
-        if rec_id == True:
+        relat_id = {}
+        if rec_id == True:    
             rel = relations()
+            for field_struct in struct:
+                if "id_" == field_struct[:3]:
+                    values = rel.relations[field_struct]
+                    relat_id[values[0]] = self.get_id_name(resource=values[0],name=values[1])
         tmp['struct'] = struct
         tmp['rules'] = tStruct
+        tmp['relations'] = relat_id
         return tmp
 
-    def add(self, resource, json):
-        pass
+    def add(self, resource, data, comp_dat=True):
+        self.define_json(False)
+        self.set_params_get(resource)
+        info = {}
+        info[resource] = data['struct']
+        data = dicttoxml.dicttoxml(info, attr_type=False, custom_root='prestashop')
+        result = self.executeRequest(method='POST',data=data)
+        return result
 
