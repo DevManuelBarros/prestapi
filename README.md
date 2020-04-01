@@ -15,7 +15,7 @@ objeto = Prestapi(host='localhost:8080', protocol='https', key='key_from_prestas
 ~~~
 
 
-### GET (Recuperar)
+### GET (Recuperar). searh()
 
 Aquí veremos la forma rapida de obtener resultado. Primero obtendremos sin filtros los 
 
@@ -51,6 +51,35 @@ Resultado
     ]}
 ~~~
 
+Opción 2 (Filtro en devolución de campos)
+===
+
+~~~
+result = objeto.search(resource='countries', id_field='id',id_value='10')
+print(result.text)
+~~~
+
+Resultado
+--
+
+~~~
+{"countries":[{
+    "id":10,
+    "id_zone":"1",
+    "id_currency":"0",
+    "call_prefix":"39",
+    "iso_code":"IT",
+    "active":"0",
+    "contains_states":"1",
+    "need_identification_number":"0",
+    "need_zip_code":"1",
+    "zip_code_format":"NNNNN",
+    "display_tax_label":"1",
+    "name":"Italy"}
+    ]}
+~~~
+
+
 
 
 ~~~
@@ -58,6 +87,67 @@ result = objeto.search(resource='countries', id_field='id',id_value='10',display
 #Recordar que si pasamos con argumento type_json=False, devolvera un xml
 print(result.text)
 ~~~
+
+Resultado
+--
+
+~~~
+{"countries":[{"id":10,"name":"Italy"}]}
+~~~
+
+
+A
+===
+
+~~~
+result = objeto.search(resource='countries', id_field='id',id_value='[10|15|20]', display='id,name,active')
+print(result.text)
+~~~
+
+Resultado
+--
+
+~~~
+{"countries":[{
+    "id":10,"active":"0","name":"Italy"},
+    {"id":15,"active":"0","name":"Portugal"},
+    {"id":20,"active":"0","name":"Denmark"}
+    ]}
+~~~
+
+B
+===
+
+~~~
+result = objeto.search(resource='countries', id_field='id',id_value='[10,25]', display='id,name,active')
+print(result.text)
+~~~
+
+Resultado
+--
+
+~~~
+{"countries":[{
+    "id":10,"active":"0","name":"Italy"},
+    {"id":11,"active":"0","name":"Japan"},
+    {"id":12,"active":"0","name":"Luxemburg"},
+    {"id":13,"active":"0","name":"Netherlands"},
+    {"id":14,"active":"0","name":"Poland"},
+    {"id":15,"active":"0","name":"Portugal"},
+    {"id":16,"active":"0","name":"Czech Republic"},
+    {"id":17,"active":"0","name":"United Kingdom"},
+    {"id":18,"active":"0","name":"Sweden"},
+    {"id":19,"active":"0","name":"Switzerland"},
+    {"id":20,"active":"0","name":"Denmark"},
+    {"id":21,"active":"1","name":"United States"},
+    {"id":22,"active":"0","name":"HongKong"},
+    {"id":23,"active":"0","name":"Norway"},
+    {"id":24,"active":"0","name":"Australia"},
+    {"id":25,"active":"0","name":"Singapore"}
+    ]}
+~~~
+
+
 
 #### Busquedas generales (Manual)
 
@@ -82,10 +172,11 @@ Resultado
 ~~~
 
 Opción 2 (Filtro en devolución de campos)
+===
 
 En este caso definiremos lo que traeremos pero nada más. Quitamos el argumento display_full=True de set.params.get() y agregamos la función display_params y enviamos un string con los campos separados por coma que queremos que nos devuelva.
 
-===
+
 ~~~
 objeto.set_params_get(resource='manufacturers')
 objeto.display_params('id,name')
