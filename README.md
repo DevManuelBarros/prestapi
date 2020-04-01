@@ -14,7 +14,52 @@ from PrestaShopWebservice import Prestapi
 objeto = Prestapi(host='localhost:8080', protocol='https', key='key_from_prestashop')
 ~~~
 
-#### Busquedas generales.
+
+### GET (Recuperar)
+
+Aquí veremos la forma rapida de obtener resultado. Primero obtendremos sin filtros los 
+
+~~~
+result = objeto.search(resource='manufacturers') # devuelve un objeto json
+#resulta = objeto.search(resource='manufacturers', type_json=False) #Esta linea devolvería XML 
+print(result.text)
+~~~
+
+Resultado
+--
+
+~~~
+{"manufacturers":[{"id":1,"active":"1","link_rewrite":"studio-design","name":"Studio Design","date_add":"2020-03-17 20:06:59","date_upd":"2020-03-17 20:06:59","description":"<p><span style=\"font-size:10pt;font-style:normal;\">Studio Design offers a range of items from ready-to-wear collections to contemporary objects. The brand has been presenting new ideas and trends since its creation in 2012.<\/span><\/p>","short_description":"","meta_title":"","meta_description":"","meta_keywords":"","associations":{"addresses":[{"id":"4"}]}},{"id":2,"active":"1","link_rewrite":"graphic-corner","name":"Graphic Corner","date_add":"2020-03-17 20:06:59","date_upd":"2020-03-17 20:06:59","description":"<p><span style=\"font-size:10pt;font-style:normal;\">Since 2010, Graphic Corner offers a large choice of quality posters, available on paper and many other formats. <\/span><\/p>","short_description":"","meta_title":"","meta_description":"","meta_keywords":""}]}
+~~~
+
+Filtrando campos.
+--
+
+
+~~~
+result = objeto.search(resource='manufacturers',display='id,name')
+#Recordar que si pasamos con argumento type_json=False, devolvera un xml
+print(result.text)
+~~~
+
+Resultado
+--
+~~~
+{"manufacturers":[
+    {"id":1,"name":"Studio Design"},
+    {"id":2,"name":"Graphic Corner"}
+    ]}
+~~~
+
+
+
+~~~
+result = objeto.search(resource='countries', id_field='id',id_value='10',display='id,name')
+#Recordar que si pasamos con argumento type_json=False, devolvera un xml
+print(result.text)
+~~~
+
+#### Busquedas generales (Manual)
 
 Opción 1 (Sin Filtro)
 ===
@@ -184,7 +229,7 @@ Resultado
 
 ### ADD (Agregar)
 
-### GET (Recuperar)
+
 
 ### DELETE (Borrar)
 
