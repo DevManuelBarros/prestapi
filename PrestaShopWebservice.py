@@ -335,9 +335,9 @@ class Prestapi:
                 #comprobamos si es un campo requerido
                 if 'required' in data_control[reg]:
                     isRequired = data_control[reg]['required']
+                        #if data[reg] == '':
                     #por lo general esta en 'true' por las dudas se deja para hacer una segunda comprobación.
                     if isRequired == 'true':
-                        if data[reg] == '':
                             msgError += "El registro {} no tiene valores y son requeridos. \n".format(reg)
                 #Ahora comprobamos si el tamaño excede.
                 if 'maxSize' in data_control[reg]:
@@ -415,7 +415,17 @@ class Prestapi:
     #Sector para la eliminación de registro.
     #---------------------------------------
 
+    
+        
     def delete(self, resource, id):
+        """
+        ```
+        def delete(): Borra una entidad
+        resource (str) # cadena que contiene el host adonde debemos acceder.
+        id       (str) # cadena con la clave que nos entrego PrestaShop
+        return boolean, str
+        ```
+        """
         self.set_params_get(resource=resource, id=str(id))
         result = self.executeRequest(method='DELETE')
         msg = self.checkStatusCode(result.status_code)
@@ -432,7 +442,7 @@ class Prestapi:
     def fun(self):
         # lo que se debe tomar el self.line_for_format para comprobar como 
         #string de comprabacion
-        #self.line_for_format 
+        #self.line_for_format
         return True, ''
 
 

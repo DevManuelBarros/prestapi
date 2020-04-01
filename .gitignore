@@ -4,3 +4,4 @@ envapi/*
 main.py
 .gitignore
 cache/*
+env/*
