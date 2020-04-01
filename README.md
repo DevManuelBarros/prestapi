@@ -7,62 +7,62 @@ Prestapi esa pequeña aplicación para acceder a la API de PrestaShop. Se realiz
 ### Generales (Controles basicos )
 
 #### Iniciar Prestapi
-~~~
+```python
 #importamos la libreria
 from PrestaShopWebservice import Prestapi
 
 objeto = Prestapi(host='localhost:8080', protocol='https', key='key_from_prestashop')
-~~~
+```
 
 
-### GET (Recuperar). searh()
+### GET (Recuperar). search()
 
 Aquí veremos la forma rapida de obtener resultado. Primero obtendremos sin filtros los 
 
-~~~
+```python
 result = objeto.search(resource='manufacturers') # devuelve un objeto json
 #resulta = objeto.search(resource='manufacturers', type_json=False) #Esta linea devolvería XML 
 print(result.text)
-~~~
+```
 
 Resultado
 --
 
-~~~
+```python
 {"manufacturers":[{"id":1,"active":"1","link_rewrite":"studio-design","name":"Studio Design","date_add":"2020-03-17 20:06:59","date_upd":"2020-03-17 20:06:59","description":"<p><span style=\"font-size:10pt;font-style:normal;\">Studio Design offers a range of items from ready-to-wear collections to contemporary objects. The brand has been presenting new ideas and trends since its creation in 2012.<\/span><\/p>","short_description":"","meta_title":"","meta_description":"","meta_keywords":"","associations":{"addresses":[{"id":"4"}]}},{"id":2,"active":"1","link_rewrite":"graphic-corner","name":"Graphic Corner","date_add":"2020-03-17 20:06:59","date_upd":"2020-03-17 20:06:59","description":"<p><span style=\"font-size:10pt;font-style:normal;\">Since 2010, Graphic Corner offers a large choice of quality posters, available on paper and many other formats. <\/span><\/p>","short_description":"","meta_title":"","meta_description":"","meta_keywords":""}]}
-~~~
+```
 
 Filtrando campos.
 --
 
 
-~~~
+```python
 result = objeto.search(resource='manufacturers',display='id,name')
 #Recordar que si pasamos con argumento type_json=False, devolvera un xml
 print(result.text)
-~~~
+```
 
 Resultado
 --
-~~~
+```python
 {"manufacturers":[
     {"id":1,"name":"Studio Design"},
     {"id":2,"name":"Graphic Corner"}
     ]}
-~~~
+```
 
 Opción 2 (Filtro en devolución de campos)
 ===
 
-~~~
+```python
 result = objeto.search(resource='countries', id_field='id',id_value='10')
 print(result.text)
-~~~
+```
 
 Resultado
 --
 
-~~~
+```python
 {"countries":[{
     "id":10,
     "id_zone":"1",
@@ -77,56 +77,56 @@ Resultado
     "display_tax_label":"1",
     "name":"Italy"}
     ]}
-~~~
+```
 
 
 
 
-~~~
+```python
 result = objeto.search(resource='countries', id_field='id',id_value='10',display='id,name')
 #Recordar que si pasamos con argumento type_json=False, devolvera un xml
 print(result.text)
-~~~
+```
 
 Resultado
 --
 
-~~~
+```python
 {"countries":[{"id":10,"name":"Italy"}]}
-~~~
+```
 
 
 A
 ===
 
-~~~
+```python
 result = objeto.search(resource='countries', id_field='id',id_value='[10|15|20]', display='id,name,active')
 print(result.text)
-~~~
+```
 
 Resultado
 --
 
-~~~
+```python
 {"countries":[{
     "id":10,"active":"0","name":"Italy"},
     {"id":15,"active":"0","name":"Portugal"},
     {"id":20,"active":"0","name":"Denmark"}
     ]}
-~~~
+```
 
 B
 ===
 
-~~~
+```python
 result = objeto.search(resource='countries', id_field='id',id_value='[10,25]', display='id,name,active')
 print(result.text)
-~~~
+```
 
 Resultado
 --
 
-~~~
+```python
 {"countries":[{
     "id":10,"active":"0","name":"Italy"},
     {"id":11,"active":"0","name":"Japan"},
@@ -145,7 +145,7 @@ Resultado
     {"id":24,"active":"0","name":"Australia"},
     {"id":25,"active":"0","name":"Singapore"}
     ]}
-~~~
+```
 
 
 
@@ -154,3 +154,5 @@ Resultado
 ### DELETE (Borrar)
 
 ### PUT (Actualizar)
+
+
