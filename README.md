@@ -6,7 +6,8 @@ Prestapi esa pequeña aplicación para acceder a la API de PrestaShop. Se realiz
 
 ### Generales (Controles basicos )
 
-#### Iniciar Prestapi
+# Iniciar Prestapi
+
 ```python
 #importamos la libreria
 from PrestaShopWebservice import Prestapi
@@ -15,7 +16,7 @@ objeto = Prestapi(host='localhost:8080', protocol='https', key='key_from_prestas
 ```
 
 
-### GET (Recuperar). search()
+# SEARCH (Recuperar)
 
 Aquí veremos la forma rapida de obtener resultado. Primero obtendremos sin filtros los 
 
@@ -25,15 +26,15 @@ result = objeto.search(resource='manufacturers') # devuelve un objeto json
 print(result.text)
 ```
 
-Resultado
---
+**Resultado**
+
 
 ```python
 {"manufacturers":[{"id":1,"active":"1","link_rewrite":"studio-design","name":"Studio Design","date_add":"2020-03-17 20:06:59","date_upd":"2020-03-17 20:06:59","description":"<p><span style=\"font-size:10pt;font-style:normal;\">Studio Design offers a range of items from ready-to-wear collections to contemporary objects. The brand has been presenting new ideas and trends since its creation in 2012.<\/span><\/p>","short_description":"","meta_title":"","meta_description":"","meta_keywords":"","associations":{"addresses":[{"id":"4"}]}},{"id":2,"active":"1","link_rewrite":"graphic-corner","name":"Graphic Corner","date_add":"2020-03-17 20:06:59","date_upd":"2020-03-17 20:06:59","description":"<p><span style=\"font-size:10pt;font-style:normal;\">Since 2010, Graphic Corner offers a large choice of quality posters, available on paper and many other formats. <\/span><\/p>","short_description":"","meta_title":"","meta_description":"","meta_keywords":""}]}
 ```
 
-Filtrando campos.
---
+## Filtrando campos.
+
 
 
 ```python
@@ -42,8 +43,8 @@ result = objeto.search(resource='manufacturers',display='id,name')
 print(result.text)
 ```
 
-Resultado
---
+**Resultado**
+
 ```python
 {"manufacturers":[
     {"id":1,"name":"Studio Design"},
@@ -51,16 +52,14 @@ Resultado
     ]}
 ```
 
-Opción 2 (Filtro en devolución de campos)
-===
 
 ```python
 result = objeto.search(resource='countries', id_field='id',id_value='10')
 print(result.text)
 ```
 
-Resultado
---
+**Resultado**
+
 
 ```python
 {"countries":[{
@@ -80,6 +79,9 @@ Resultado
 ```
 
 
+## Filtro en devolución de campos
+
+Aqui haremos lo que en SQL es normalmente el SELECT de los campos.
 
 
 ```python
@@ -88,8 +90,7 @@ result = objeto.search(resource='countries', id_field='id',id_value='10',display
 print(result.text)
 ```
 
-Resultado
---
+**Resultado**
 
 ```python
 {"countries":[{"id":10,"name":"Italy"}]}
@@ -104,8 +105,8 @@ result = objeto.search(resource='countries', id_field='id',id_value='[10|15|20]'
 print(result.text)
 ```
 
-Resultado
---
+**Resultado**
+
 
 ```python
 {"countries":[{
@@ -115,16 +116,15 @@ Resultado
     ]}
 ```
 
-B
-===
+## B
 
 ```python
 result = objeto.search(resource='countries', id_field='id',id_value='[10,25]', display='id,name,active')
 print(result.text)
 ```
 
-Resultado
---
+**Resultado**
+
 
 ```python
 {"countries":[{
@@ -148,24 +148,24 @@ Resultado
 ```
 
 
-### DELETE (Borrar)
+# DELETE (Borrar)
 
 El borrado de registros quiza es lo más sencillo de realizar. Simplemente tenemos que entidad queremos trabajar y el id del registro a eliminar. 
 
 ```python
 result = objeto.delete(resource='addresses', id=11)
 if result[0] == False:
-    print("la petición a fallado. El mensaje: {}".format(result[1]))
+    print("La petición a fallado. El mensaje: {}".format(result[1]))
 else:
     print("La petición ha sido exitosa")
 ```
 
-Resultado
---
+**Resultado**
+
 Si nos da un error el resultado sería algo como lo siguiente
 
 ```
-ERROR!... 
+La petición a fallado. El mensaje: ERROR!... 
  This call to PrestaShop Web Services failed and returned an HTTP status of 404. 
  That means: Not Found. 
  Details: Recurso no encontrado. Se utiliza cuando el servidor web no encuentra la página o recurso solicitado..
@@ -173,9 +173,9 @@ ERROR!...
 
 
 
-### ADD (Agregar)
+# ADD (Agregar)
 
 
-### PUT (Actualizar)
+# PUT (Actualizar)
 
 
