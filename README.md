@@ -61,7 +61,7 @@ Mucho más claro y más afinada la busqueda.
 
  Lo anterior funciono bien, pero ahora queremos solo traer algunos campos. Para obtener solamente la información que nos importa.
 
-Opción 3 (Filtro por valores)
+Opción 3 (a.Filtro por valores)
 ===
 
 Ahora lo que haremos será trabajar sobre una entidad más grande (countries) y comenzaremos a realizar algunos filtros más complejos.  
@@ -96,6 +96,9 @@ El resultado sería algo como lo siguiente:
     ]}
 ~~~
 
+Opción 3. (b.Filtro trayendo campos) 
+--
+
 Pero quiza solo necesitemos traer algunos campos nada más, por ejemplo: 'id', 'name' y 'active'. Podríamos hacerlo de la siguiente manera:
 
 ~~~
@@ -112,6 +115,10 @@ Resultado
 ~~~
 {"countries":[{"id":10,"active":"0","name":"Italy"}]}
 ~~~
+
+
+Opción 3. (c.Filtro con rangos) 
+--
 
 Perfecto, pero si queres más campos que estos solos, queremos filtrar el campo 10, 15 y 20. Haríamos lo siguiente:
 
