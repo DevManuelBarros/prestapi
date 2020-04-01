@@ -148,10 +148,33 @@ Resultado
 ```
 
 
+### DELETE (Borrar)
+
+El borrado de registros quiza es lo más sencillo de realizar. Simplemente tenemos que entidad queremos trabajar y el id del registro a eliminar. 
+
+```python
+result = objeto.delete(resource='addresses', id=11)
+if result[0] == False:
+    print("la petición a fallado. El mensaje: {}".format(result[1]))
+else:
+    print("La petición ha sido exitosa")
+```
+
+Resultado
+--
+Si nos da un error el resultado sería algo como lo siguiente
+
+```
+ERROR!... 
+ This call to PrestaShop Web Services failed and returned an HTTP status of 404. 
+ That means: Not Found. 
+ Details: Recurso no encontrado. Se utiliza cuando el servidor web no encuentra la página o recurso solicitado..
+```
+
+
 
 ### ADD (Agregar)
 
-### DELETE (Borrar)
 
 ### PUT (Actualizar)
 

@@ -61,7 +61,7 @@ class Prestapi:
         self.psCompatibleVersionsMax = '1.7.99.99'          #La maxima versión comprobada que funciona con esta APP
         self.protocol = protocol + "://"                    #creamos la cadena para el protocolo
         self.dir_cache = "cache/"                           #configuracion de la carpeta que hara de cache
-
+        
 
     def limit_params(self, number, starindex=0):
         self.int_params['limit'] = "{},{}".format(starindex,number)
@@ -69,10 +69,7 @@ class Prestapi:
     def filter_params(self, id_field, id_value, display=False):
         #{'filter[id]':'[10,250]','display':'[id,name]'}
         self.int_params["filter[{}]".format(id_field)] = id_value
-        if display != False:
-            self.int_params['display'] = '[' + display + ']'
-        else:
-            self.int_params['display'] = 'full'
+        self.display_params(display=display)
 
     def display_params(self, display=False):
         if display != False:
@@ -80,6 +77,19 @@ class Prestapi:
         else:
             self.int_params['display'] = 'full'
 
+
+
+    def search(self, resource, id_field=False,id_value=False, display=False, type_json=True):
+        self.set_params_get(resource=resource)
+        if id_field!= False and id_value!=False:
+            self.filter_params(id_field=id_field, id_value=id_value,display=display)
+            self.set_params_get(resource=resource)
+        else:
+            self.set_params_get(resource=resource)
+            self.display_params(display=display)
+        self.define_json(type_json=type_json)
+        result = self.executeRequest()
+        return result
 
     """
     def checkStatusCode: Control del estado de las peticiones.
@@ -89,7 +99,7 @@ class Prestapi:
     def checkStatusCode(self, status_code):
         error_label = 'ERROR!... \n This call to PrestaShop Web Services failed and returned an HTTP status of {}. \n That means: {}. \n Details: {}.'
         msg_label = 'OK!... \n This call to Prestashop Web Services returned an HTTO status of {}. \n That means: {}. \n Details: {}.'
-        case = {200 : error_label.format(status_code, 'Ok', 'Respuesta estándar para peticiones correctas.'),
+        case = {200 : msg_label.format(status_code, 'Ok', 'Respuesta estándar para peticiones correctas.'),
                 201: msg_label.format(status_code, 'Created', 'La petición ha sido completada y ha resultado en la creación de un nuevo recurso.'),
                 202: msg_label.format(status_code, 'Accepted', 'La petición ha sido aceptada para procesamiento, pero este no ha sido completado. La petición eventualmente pudiere no ser satisfecha, ya que podría ser no permitida o prohibida cuando el procesamiento tenga lugar.'),
                 203: msg_label.format(status_code,'Non-Authoritative Information','La petición se ha completado con éxito, pero su contenido no se ha obtenido de la fuente originalmente solicitada sino de otro servidor.'),
@@ -400,6 +410,20 @@ class Prestapi:
         result = self.executeRequest(method='POST',data=data) #llamamos a executeRequest para enviar los datos.
         return result
 
+    #
+    #-------------- DELETE -----------------
+    #Sector para la eliminación de registro.
+    #---------------------------------------
+
+    def delete(self, resource, id):
+        self.set_params_get(resource=resource, id=str(id))
+        result = self.executeRequest(method='DELETE')
+        msg = self.checkStatusCode(result.status_code)
+        if result.status_code == 200:
+            return True, msg
+        return False, msg
+
+
 
     """
     def fun : Esta funcion simplemente es el esquema para poder personalizar cada
@@ -410,3 +434,6 @@ class Prestapi:
         #string de comprabacion
         #self.line_for_format 
         return True, ''
+
+
+    
