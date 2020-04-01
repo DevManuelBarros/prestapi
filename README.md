@@ -82,7 +82,18 @@ print(result.text)
 El resultado sería algo como lo siguiente:
 --
 ~~~
-{"countries":[{"id":10,"id_zone":"1","id_currency":"0","call_prefix":"39","iso_code":"IT","active":"0","contains_states":"1","need_identification_number":"0","need_zip_code":"1","zip_code_format":"NNNNN","display_tax_label":"1","name":"Italy"}]}
+{"countries":[
+    {"id":10,"id_zone":"1",
+    "id_currency":"0",
+    "call_prefix":"39",
+    "iso_code":"IT","active":"0",
+    "contains_states":"1",
+    "need_identification_number":"0",
+    "need_zip_code":"1",
+    "zip_code_format":"NNNNN",
+    "display_tax_label":"1",
+    "name":"Italy"}
+    ]}
 ~~~
 
 Pero quiza solo necesitemos traer algunos campos nada más, por ejemplo: 'id', 'name' y 'active'. Podríamos hacerlo de la siguiente manera:
