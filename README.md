@@ -1,10 +1,14 @@
 #   Prestapi.
 
 ## Descripción
-Prestapi esa pequeña aplicación para acceder a la API de PrestaShop. Se realizo con el fin de que sea un poco más robusta de lo que ya existe. No solamente cumple con las funciones comunes sino que realiza algunas tareas más para más facilitarlo. Conceptualmente se divide en:
+Prestapi esa pequeña aplicación para acceder a la API de PrestaShop. Se realizo con el fin de que sea un poco más robusta de lo que ya existe. No solamente cumple con las funciones comunes sino que realiza algunas tareas más para facilitar la interacción. Conceptualmente se divide en:
 
 
-### Generales (Controles basicos )
+# Generales (Controles basicos )
+* GET    --> search()
+* DELETE --> delete()
+* PUT    --> update()
+* ADD    --> add()
 
 # Iniciar Prestapi
 
