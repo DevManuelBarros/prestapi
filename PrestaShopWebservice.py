@@ -9,7 +9,7 @@ from xml.etree import ElementTree
 #Imports particulares
 from const_rel import relations
 
-class PrestaShopWebservice:
+class Prestapi:
     """
     def __init__: Inicializa la clase
     ---\n
@@ -34,18 +34,52 @@ class PrestaShopWebservice:
                                 'id':'',
                                 'schema' : ''}
         #Otros parametros que podemos utilizar para para obtener datos, etc.
-        self.other_params = {
-                            'filter' : '',
-                            'sort' : '',
-                            'limit' : '',
-                            'id_shop' : '',
-                            'id_group_shop' : ''
-                            }
+        #self.other_params = {
+        #                    'filter' : '',
+        #                    'sort' : '',
+        #                    'limit' : '',
+        #                    'id_shop' : '',
+        #                    'id_group_shop' : ''
+        #                    }
+        self.int_params = {}
+        self.line_for_format = ""
+        self.dict_format = {
+                            'isNullOrUnsigned' : self.fun,
+                            'isUnsignedId'     : self.fun,
+                            'isGenericName'    : self.fun,
+                            'isName'           : self.fun,
+                            'isAddress'        : self.fun,
+                            'isPostCode'       : self.fun,
+                            'isCityName'       : self.fun,
+                            'isMessage'        : self.fun,
+                            'isPhoneNumber'    : self.fun,
+                            'isDniLite'        : self.fun,
+                            'isDate'           : self.fun,
+                            'isBool'           : self.fun,
+                          }
         self.psCompatibleVersionsMin = '1.7.0.0'            #La minima versión comprobada que funciona con esta APP
         self.psCompatibleVersionsMax = '1.7.99.99'          #La maxima versión comprobada que funciona con esta APP
         self.protocol = protocol + "://"                    #creamos la cadena para el protocolo
         self.dir_cache = "cache/"                           #configuracion de la carpeta que hara de cache
-        self.define_json()                                  #le asignamos valores por defecto a la cabecera sobre entrada y salida de datos.
+
+
+    def limit_params(self, number, starindex=0):
+        self.int_params['limit'] = "{},{}".format(starindex,number)
+
+    def filter_params(self, id_field, id_value, display=False):
+        #{'filter[id]':'[10,250]','display':'[id,name]'}
+        self.int_params["filter[{}]".format(id_field)] = id_value
+        if display != False:
+            self.int_params['display'] = '[' + display + ']'
+        else:
+            self.int_params['display'] = 'full'
+
+    def display_params(self, display=False):
+        if display != False:
+            self.int_params['display'] = '[' + display + ']'
+        else:
+            self.int_params['display'] = 'full'
+
 
     """
     def checkStatusCode: Control del estado de las peticiones.
@@ -112,11 +146,13 @@ class PrestaShopWebservice:
         session = requests.Session()
         req = requests.Request(method, 
                                url_full,
+                               params=self.int_params,
                                headers=self.default_headers,
                                data=data,
                                auth=(self.key,'')
                                )
         response = session.send(req.prepare(), verify=True)
+        self.int_params = {}
         return response
 
     """
@@ -126,17 +162,20 @@ class PrestaShopWebservice:
     @id : (str)
     @schema : (str)
     """
-    def set_params_get(self, resource=False, id=False, schema=False):
+    def set_params_get(self, resource=False, id=False, schema=False,display_full=False):
         #Todos los args son opcionales, si no se coloca nada borrara los valores.j
         #en caso de que se envien valores se modificaran.
         self.default_params['resource'] = resource if resource != False else ''
         self.default_params['id'] = id if id != False else ''
         self.default_params['schema'] = schema if schema != False else ''
+        if display_full == True:
+            self.display_params()
+
 
     """
     def make_param:
     \n
-    """
+   
     def make_param(self):
         other_params = ""
         for k, v in self.other_params.items():
@@ -144,6 +183,7 @@ class PrestaShopWebservice:
                 other_params += k+"="+v+"&"
         other_params = other_params.strip()
         return other_params[:-1]
+    """
 
     """
     def make_full_url:
@@ -158,13 +198,15 @@ class PrestaShopWebservice:
         url = url  + self.default_params['resource'] if self.default_params['resource'] != '' else url
         url = url + "/" +  self.default_params['id'] if self.default_params['id'] != '' else url
         url = url + "?schema=" + self.default_params['schema'] if self.default_params['schema'] != '' else url 
+        """
         new_param = self.make_param()
         if "?" in url:
             url = url + "&" + new_param if new_param != '' else url
         else:
             url = url + "?" + new_param if new_param != '' else url 
+        """
         return str(url)
-
+        
 
     """
     def define_json: 
@@ -178,7 +220,7 @@ class PrestaShopWebservice:
         if type_json==True:
             self.default_headers['Output-Format'] = 'JSON'
             self.default_headers['Io-Format'] = 'JSON'
-            #self.default_headers['Content-Type'] = 'application/json'
+            self.default_headers['Content-Type'] = 'text/json'
         else:
             self.default_headers['Output-Format'] = 'XML'
             self.default_headers['Io-Format'] = 'XML'
@@ -192,6 +234,13 @@ class PrestaShopWebservice:
     #-----------------------------------
 
 
+    """
+    def get_id_name : funcion para recuperar datos de ID y NAME (o nombre elegido en diccionario.)
+    ---
+    \n
+    @resource : (str) nombre del recurso.
+    @name     : (str) nombre de campos a devolver.
+    """
     def get_id_name(self, resource, name):
         update = True
         self.define_json() #definimos el tipo de pedido que vamos a realizar
@@ -235,47 +284,129 @@ class PrestaShopWebservice:
             id_name = {'1' : 'No data found'}
         return id_name
 
-    
+    """
+    def get_rules_dict:  convertiremos xml en diccionario para 
+    trabajarlo más rapido.
+    ---
+    \n
+    @tStruct : (dict) diccionario a convertir en un diccionario.
+    """
     def get_rules_dict(self, tStruct):
+        #convertimos a ElementTree
         mido = ElementTree.fromstring(tStruct)
-        result = {}
+        result = {} #creamos un diccionario para enviarlo.
         for node in mido.iter():
             if node.tag != 'prestashop':
-                dicto = node.attrib
-                result[str(node.tag)] = dicto
-        del result[list(result)[0]]
+                dicto = node.attrib #tiramos los atributos.
+                result[str(node.tag)] = dicto # los colocamos en una llave.
+        del result[list(result)[0]] #Eliminamos el primero caracter, para que sea má rapido el control posterior
         return result
 
+    """
+    def add_control: funcion para controlar los datos enviados.
+    \n
+    @data : (dict) contiene los datos que luego se enviaran para guardar
+    @data_control : (dict) datos de la estructura para controlar si esta todo correcto.
+    """
+    def add_control(self, data, data_control):
+        msgError = ""   #definimos una variable de recolección de mensajes y otros.
+        for reg in data:    #comenzamos a recorrer.
+            if reg != "id": #id es un campo que no aparece en el control de datos.
+                #Empezamos con el control de Formato,
+                #Aqui se puede definir en self.dict_format una funcion para 
+                #comprobar cada uno de los tipos. Se puede modificar la funcion
+                #pero lo importante es definir como corresponde la funcion a llamar.
+                if data_control[reg]['format'] in self.dict_format:
+                    if data[reg] != '':
+                        self.line_for_format = data[reg] #Este es una variable importante.
+                        resultado = self.dict_format[data_control[reg]['format']]()
+                        if resultado[0] == False:
+                            msgError += resultado[1]
+                #comprobamos si es un campo requerido
+                if 'required' in data_control[reg]:
+                    isRequired = data_control[reg]['required']
+                    #por lo general esta en 'true' por las dudas se deja para hacer una segunda comprobación.
+                    if isRequired == 'true':
+                        if data[reg] == '':
+                            msgError += "El registro {} no tiene valores y son requeridos. \n".format(reg)
+                #Ahora comprobamos si el tamaño excede.
+                if 'maxSize' in data_control[reg]:
+                    maxSize = int(data_control[reg]['maxSize'])
+                    if data[reg] != '':
+                        if len(data[reg]) > maxSize:
+                            msgError += "El registro {} tiene más valores que el maximo permitido: {} y este campo tiene: {}. \n".format(reg, maxSize, len(data[reg]))
+        #Si no entraron errores devolvera True, y un campo vacio.
+        if msgError == "":
+            return True, msgError
+        else:
+            #Aqui es que se encontraron errores.
+            return False, msgError     
 
 
-    def get_add(self, resource, rec_id=True):
-        self.define_json()
-        self.set_params_get(resource=resource, schema='blank')
-        struct = self.executeRequest().json()
-        struct = struct[list(struct)[0]]
-        self.define_json(type_json=False)
-        self.set_params_get(resource=resource, schema='synopsis')
-        tStruct = self.executeRequest()
-        tStruct = self.get_rules_dict(tStruct=tStruct.text)
-        tmp = {}
-        relat_id = {}
-        if rec_id == True:    
-            rel = relations()
-            for field_struct in struct:
-                if "id_" == field_struct[:3]:
-                    values = rel.relations[field_struct]
+    """
+    def add_get : esto devolvera un diccionario con tres fases, \n
+    1) struct    : la estructura a completar. 
+    2) rules     : las reglas si son requeridas o que. (Esto se realiza aquí porque si se quiere utilizar para antes de hacerlo en segunda instancia.)
+    3) relations : esto dependera de rec_id si esta en True, completara las relaciones correspondientes a cada uno. 
+    ---
+    \n
+    @resource : (string) recurso con el que vamos a trabajar.
+    @rec_id   : (boolean) si se recuperan las relaciones para luego poder utilizarlas.
+    """
+    def add_get(self, resource, rec_id=True):
+        #primero trabajaremos con la estructura.
+        self.define_json()                                      #definimos la cabecera por json()
+        self.set_params_get(resource=resource, schema='blank')  #definimos los parametros, para traer la estructura
+        struct = self.executeRequest().json()                   #traemos los datos.
+        struct = struct[list(struct)[0]]                        #traemos la primer key del diccionario
+        #ahora vamos por las reglas.
+        self.define_json(type_json=False)                           #aquí trabajaremos con xml.   
+        self.set_params_get(resource=resource, schema='synopsis')   #seteamos parametros
+        tStruct = self.executeRequest()                             #recuperamos
+        tStruct = self.get_rules_dict(tStruct=tStruct.text)         #convertimos a xml el diccionario.
+        tmp = {}                # Creamos un diccionario que utilizaremos.
+        relat_id = {}           
+        if rec_id == True:      # si es true traera los datos relativos.
+            rel = relations()   # iniciamos los diccionarios de relaciones.
+            for field_struct in struct:             #Recurremos la estructura para comprobar cada campo si es de relacion o no.
+                if "id_" == field_struct[:3]:       #Si comienza en id_ tenemos un campo relacionado.
+                    values = rel.relations[field_struct] #Buscamos los valores. nombre recurso, y valor
                     relat_id[values[0]] = self.get_id_name(resource=values[0],name=values[1])
-        tmp['struct'] = struct
+        #Completamos todos los datos de la estructura.
+        tmp['struct'] = struct 
         tmp['rules'] = tStruct
         tmp['relations'] = relat_id
         return tmp
 
+    """
+    def add: función para agregar un registro.
+    \n
+    @resource : (string) nombre del recurso al que deseamos acceder.
+    @data : (dict) debe devolverse el diccionario completo.
+    comp_dat : (boolean) Si se comprobaran los datos.  
+    """
     def add(self, resource, data, comp_dat=True):
-        self.define_json(False)
-        self.set_params_get(resource)
+        result = ""                     # variable que tendra el resultado de el intento de carga.
+        self.define_json(False)         # definimos que sea archivo de envios xml
+        self.set_params_get(resource)   # definimos que vamos a trabajar con recurso pasado por argumento
+        if comp_dat == True:            #Comenzaremos la compración de datos si es TRUE.
+            result = self.add_control(data['struct'], data['rules']) #Llamamos a add_control
+            if result[0] == False:                                   # si el Resultado es False cortamos la ejecucion y enviamos el error.
+                return result                   #Si hubo error.
+        #Comenzamos a trabajar con la parte que importa.
         info = {}
-        info[resource] = data['struct']
-        data = dicttoxml.dicttoxml(info, attr_type=False, custom_root='prestashop')
-        result = self.executeRequest(method='POST',data=data)
+        info[resource] = data['struct'] #comenzamos a dar el formato que necesita el xml.
+        data = dicttoxml.dicttoxml(info, attr_type=False, custom_root='prestashop') #convertimos en xml
+        result = self.executeRequest(method='POST',data=data) #llamamos a executeRequest para enviar los datos.
         return result
 
+
+    """
+    def fun : Esta funcion simplemente es el esquema para poder personalizar cada
+    una de las comprobaciones.
+    """
+    def fun(self):
+        # lo que se debe tomar el self.line_for_format para comprobar como 
+        #string de comprabacion
+        #self.line_for_format 
+        return True, ''
