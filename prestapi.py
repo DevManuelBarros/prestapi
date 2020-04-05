@@ -284,6 +284,7 @@ class Prestapi:
     @data_control : (dict) datos de la estructura para controlar si esta todo correcto.
     """
     def add_control(self, data, data_control):
+        print(data)
         msgError = ""   #definimos una variable de recolección de mensajes y otros.
         for reg in data:    #comenzamos a recorrer.
             if reg != "id": #id es un campo que no aparece en el control de datos.
@@ -302,7 +303,7 @@ class Prestapi:
                     isRequired = data_control[reg]['required']
                         #if data[reg] == '':
                     #por lo general esta en 'true' por las dudas se deja para hacer una segunda comprobación.
-                    if isRequired == 'true':
+                    if isRequired == 'true' and data[reg] == '':
                             msgError += "El registro {} no tiene valores y son requeridos. \n".format(reg)
                 #Ahora comprobamos si el tamaño excede.
                 if 'maxSize' in data_control[reg]:
@@ -369,6 +370,7 @@ class Prestapi:
         @comp_dat : (boolean) Si se comprobaran los datos.  
         ```
         """
+        print(data['struct'])
         result = ""                     # variable que tendra el resultado de el intento de carga.
         if comp_dat == True:            #Comenzaremos la compración de datos si es TRUE.
             result = self.add_control(data['struct'], data['rules']) #Llamamos a add_control

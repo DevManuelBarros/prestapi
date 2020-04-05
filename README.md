@@ -514,7 +514,7 @@ print(result_get['struct'])
 **Resultado**
 
 
-realizando esto, logramos ver lo siguiente:
+Realizando esto, logramos ver lo siguiente:
 
 
 ```python
@@ -544,7 +544,53 @@ realizando esto, logramos ver lo siguiente:
         'date_upd': ''
         }
 ```
-Luego de grabarlo tenemos que utilizar la funcion ***add()***, 
+Luego de grabarlo tenemos que utilizar la funcion ***add()***, lo único que tenemos que hacer en codigo es lo siguiente:
+
+```python
+resultado = objeto.add(result_get)
+print(resultado.text)
+```
+
+Esto realizara muchas tareas --> ***comp_dat=True*** esta por defecto, que es un argumento de la función add(). Si lo ponemos en ```comp_dat=False``` lo que ocurrira es que no hara comprobaciones en caso contrario realizara tres comprobaciones:
+
+* 1) Required: Si el campo es requerido.
+* 2) MaxSize : La cantidad de caracteres sea la permitida.
+* 3) Según campo: Estas funciones pueden ser personalizadas, en la versión actual esta se deja la estructura armada para poder realizarlo, en el futuro se haran comprobaciones y se permitira editarlas.
+
+
+**Resultado**
+El resultado de la grabación es igual que en los pasos sencillos simplmente en xml:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
+<address>
+        <id><![CDATA[16]]></id>
+        <id_customer></id_customer>
+        <id_manufacturer></id_manufacturer>
+        <id_supplier></id_supplier>
+        <id_warehouse></id_warehouse>
+        <id_country xlink:href="https://cristalgrafargentina.com/api/countries/1"><![CDATA[1]]></id_country>
+        <id_state></id_state>
+        <alias><![CDATA[Direccion2]]></alias>
+        <company></company>
+        <lastname><![CDATA[Otropellido]]></lastname>
+        <firstname><![CDATA[Otronombre]]></firstname>
+        <vat_number></vat_number>
+        <address1><![CDATA[dos direccion]]></address1>
+        <address2></address2>
+        <postcode><![CDATA[2345678]]></postcode>
+        <city><![CDATA[Santa Fe]]></city>
+        <other></other>
+        <phone></phone>
+        <phone_mobile></phone_mobile>
+        <dni></dni>
+        <deleted></deleted>
+        <date_add><![CDATA[2020-04-05 19:42:22]]></date_add>
+        <date_upd><![CDATA[2020-04-05 19:42:22]]></date_upd>
+</address>
+</prestashop>
+```
 # PUT (Actualizar)
 
 
