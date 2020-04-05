@@ -319,7 +319,7 @@ print(tmpResult)
 
 **Resultado**
 
-```json
+```python
         {'address': 
                 {'id': '',
                 'id_customer': '', 
@@ -345,7 +345,6 @@ print(tmpResult)
                 'date_upd': ''
                 }
             }
-
 ```
 
 
