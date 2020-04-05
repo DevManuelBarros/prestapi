@@ -498,6 +498,53 @@ Veamos el resultado:
  'resource': 'addresses'}
 ```
 
+Ahora completamos los datos de la estructura, en vez de poner en la el indice el recurso o entidad que estamos utilizando, ponemos ***struct***, el resultado es muy similar a antes:
+
+```python
+result_get['struct']['alias']  = 'Direccion2'
+result_get['struct']['lastname'] = 'Otropellido'
+result_get['struct']['firstname'] = 'Otronombre'
+result_get['struct']['address1'] = 'dos direccion'
+result_get['struct']['postcode'] = '2345678'
+result_get['struct']['city'] = 'Santa Fe'
+result_get['struct']['id_country'] = 1 
+print(result_get['struct'])
+```
+
+**Resultado**
+
+
+realizando esto, logramos ver lo siguiente:
+
+
+```python
+        {
+        'id': '', 
+        'id_customer': '', 
+        'id_manufacturer': '', 
+        'id_supplier': '', 
+        'id_warehouse': '', 
+        'id_country': 1, 
+        'id_state': '', 
+        'alias': 'Direccion2', 
+        'company': '', 
+        'lastname': 'Otropellido', 
+        'firstname': 'Otronombre', 
+        'vat_number': '', 
+        'address1': 'dos direccion', 
+        'address2': '', 
+        'postcode': '2345678', 
+        'city': 'Santa Fe', 
+        'other': '', 
+        'phone': '', 
+        'phone_mobile': '', 
+        'dni': '', 
+        'deleted': '', 
+        'date_add': '', 
+        'date_upd': ''
+        }
+```
+Luego de grabarlo tenemos que utilizar la funcion ***add()***, 
 # PUT (Actualizar)
 
 
