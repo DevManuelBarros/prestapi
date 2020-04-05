@@ -369,7 +369,7 @@ Lo que obtendremos por resultado, es un xml con el resultado cuando hagamos *** 
         <id_manufacturer></id_manufacturer>
         <id_supplier></id_supplier>
         <id_warehouse></id_warehouse>
-        <id_country xlink:href="https://cristalgrafargentina.com/api/countries/1"><![CDATA[1]]></id_country>
+        <id_country xlink:href="https://localhost:8080/api/countries/1"><![CDATA[1]]></id_country>
         <id_state></id_state>
         <alias><![CDATA[Direccion1]]></alias>
         <company></company>
@@ -570,7 +570,7 @@ El resultado de la grabación es igual que en los pasos sencillos simplmente en 
         <id_manufacturer></id_manufacturer>
         <id_supplier></id_supplier>
         <id_warehouse></id_warehouse>
-        <id_country xlink:href="https://cristalgrafargentina.com/api/countries/1"><![CDATA[1]]></id_country>
+        <id_country xlink:href="https://localhost:8080/api/countries/1"><![CDATA[1]]></id_country>
         <id_state></id_state>
         <alias><![CDATA[Direccion2]]></alias>
         <company></company>
