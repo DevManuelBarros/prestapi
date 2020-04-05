@@ -81,7 +81,7 @@ class Prestapi:
 
     def search(self, resource, id_field=False,id_value=False, display=False, type_json=True):
         self.set_params_get(resource=resource)
-        if id_field!= False and id_value!=False:
+        if id_field != False and id_value!=False:
             self.filter_params(id_field=id_field, id_value=id_value,display=display)
             self.set_params_get(resource=resource)
         else:
@@ -433,5 +433,16 @@ class Prestapi:
         #self.line_for_format
         return True, ''
 
+    def put_get(self, resource, id):
+        tmpObject = self.search(resource=resource,id_field='id', id_value=id).json()
+        result = {}
+        result[resource] = tmpObject[resource][0] 
+        return result
 
-    
+    def put(self, data):
+        self.set_params_get(list(data)[0])
+        self.define_json(False)
+        data = dicttoxml.dicttoxml(data, attr_type=False, custom_root='prestashop') #convertimos en xml
+        print(data)
+        result = self.executeRequest(method='PUT',data=data) #llamamos a executeRequest para enviar los datos.         
+        return result

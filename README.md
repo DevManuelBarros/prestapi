@@ -201,6 +201,71 @@ La petición a fallado. El mensaje: ERROR!...
 ```
 
 
+# PUT (Actualizar)
+
+Para actualizar debemos realizar realizar lo siguiente: 1) Recuperar el registro, 2) Editarlo según los cambios que querramos realizar y finalmente 3) Grabarlo.
+
+Vamos por el paso 1)
+
+```python
+resultado = objeto.put_get(resource='addresses', id=14)
+```
+
+
+**Resultado**
+
+```
+{'addresses': {'id': 14, 'id_customer': '0', 'id_manufacturer': '0', 'id_supplier': '0', 'id_warehouse': '0', 'id_country': '1', 'id_state': '0', 'alias': 'Direccion1', 'company': '', 'lastname': 'OtroApellido', 'firstname': 'Unnombre', 'vat_number': '', 'address1': 'Una direccion', 'address2': '', 'postcode': '1234567', 'city': 'Buenos Aires', 'other': '', 'phone': '', 'phone_mobile': '', 'dni': '', 'deleted': '0', 'date_add': '2020-04-05 17:53:00', 'date_upd': '2020-04-05 20:17:44'}}
+```
+
+Entonces vamos a editar por ejemplo el campo ```firstname```:
+
+```python
+resultado['addresses']['firstname'] = 'NuevoPrimerNombre'
+```
+
+Con esto ya modificamos el campo, ahora simplemente devolveremos este diccionario para que se actualice:
+
+```python
+final = objeto.put(resultado)
+print(final.text)
+```
+
+**Resultado**
+
+Se nos devuelve un XML ya actualizado:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
+<address>
+        <id><![CDATA[14]]></id>
+        <id_customer><![CDATA[0]]></id_customer>
+        <id_manufacturer><![CDATA[0]]></id_manufacturer>
+        <id_supplier><![CDATA[0]]></id_supplier>
+        <id_warehouse><![CDATA[0]]></id_warehouse>
+        <id_country xlink:href="https://localhost:8080/api/countries/1"><![CDATA[1]]></id_country>
+        <id_state><![CDATA[0]]></id_state>
+        <alias><![CDATA[Direccion1]]></alias>
+        <company></company>
+        <lastname><![CDATA[OtroApellido]]></lastname>
+        <firstname><![CDATA[NuevoPrimerNombre]]></firstname>
+        <vat_number></vat_number>
+        <address1><![CDATA[Una direccion]]></address1>
+        <address2></address2>
+        <postcode><![CDATA[1234567]]></postcode>
+        <city><![CDATA[Buenos Aires]]></city>
+        <other></other>
+        <phone></phone>
+        <phone_mobile></phone_mobile>
+        <dni></dni>
+        <deleted><![CDATA[0]]></deleted>
+        <date_add><![CDATA[2020-04-05 17:53:00]]></date_add>
+        <date_upd><![CDATA[2020-04-05 20:28:13]]></date_upd>
+</address>
+</prestashop>
+```
+
 
 # ADD (Agregar)
 
@@ -553,10 +618,11 @@ print(resultado.text)
 
 Esto realizara muchas tareas --> ***comp_dat=True*** esta por defecto, que es un argumento de la función add(). Si lo ponemos en ```comp_dat=False``` lo que ocurrira es que no hara comprobaciones en caso contrario realizara tres comprobaciones:
 
-* 1) Required: Si el campo es requerido.
-* 2) MaxSize : La cantidad de caracteres sea la permitida.
-* 3) Según campo: Estas funciones pueden ser personalizadas, en la versión actual esta se deja la estructura armada para poder realizarlo, en el futuro se haran comprobaciones y se permitira editarlas.
+1) Required: Si el campo es requerido.
+2) MaxSize : La cantidad de caracteres sea la permitida.
+3) Según campo: Estas funciones pueden ser personalizadas, en la versión actual esta se deja la estructura armada para poder realizarlo, en el futuro se haran comprobaciones y se permitira editarlas.
 
+Para ver como personalizarla ir al sector de (***Rules***) donde mostraremos como funciona esta parte.
 
 **Resultado**
 El resultado de la grabación es igual que en los pasos sencillos simplmente en xml:
@@ -591,6 +657,3 @@ El resultado de la grabación es igual que en los pasos sencillos simplmente en 
 </address>
 </prestashop>
 ```
-# PUT (Actualizar)
-
-
