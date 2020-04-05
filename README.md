@@ -204,6 +204,9 @@ La petición a fallado. El mensaje: ERROR!...
 
 # ADD (Agregar)
 
+Método 1.
+--
+
 Es importante primero saber que para poder grabar datos es necesario recuperar la estructura. Prestapi, permite dos forma de realizarlo, la primera un poco más manual y la otra una forma un poquito más robusta. Primero veamos la forma más simple y sencilla de realizarlo que simplemente implicaría recuperar la escructura requerida en formato json, llenarla y enviarla al servidor para grabarla. Lo primero que haremos será traer la estructura a través de ***get_struct()***.
 
 tmpResult = objeto.get_struct('addresses')
@@ -346,7 +349,154 @@ print(tmpResult)
                 }
             }
 ```
+Ahora si podemos proceder a grabar lo que hemos guardado, la funcion que utilizaremos es ***save()***
 
+```python
+result = objeto.save(resource='addresses', data=tmpResult)
+print(result.text)
+tp = objeto.search(resource='addresses', display='id,alias')
+print(tp.text)
+```
+
+Lo que obtendremos por resultado, es un xml con el resultado cuando hagamos *** print(result.text) *** como lo siguiente:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<prestashop xmlns:xlink="http://www.w3.org/1999/xlink">
+<address>
+        <id><![CDATA[14]]></id>
+        <id_customer></id_customer>
+        <id_manufacturer></id_manufacturer>
+        <id_supplier></id_supplier>
+        <id_warehouse></id_warehouse>
+        <id_country xlink:href="https://cristalgrafargentina.com/api/countries/1"><![CDATA[1]]></id_country>
+        <id_state></id_state>
+        <alias><![CDATA[Direccion1]]></alias>
+        <company></company>
+        <lastname><![CDATA[Unapellido]]></lastname>
+        <firstname><![CDATA[Unnombre]]></firstname>
+        <vat_number></vat_number>
+        <address1><![CDATA[Una direccion]]></address1>
+        <address2></address2>
+        <postcode><![CDATA[1234567]]></postcode>
+        <city><![CDATA[Buenos Aires]]></city>
+        <other></other>
+        <phone></phone>
+        <phone_mobile></phone_mobile>
+        <dni></dni>
+        <deleted></deleted>
+        <date_add><![CDATA[2020-04-05 17:53:00]]></date_add>
+        <date_upd><![CDATA[2020-04-05 17:53:00]]></date_upd>
+</address>
+</prestashop>
+```
+
+Donde podemos encontrar los datos que completa la API, por ejemplo el ID, etc.
+
+Luego con las ultimas lineas obtenemos un listado de lo que tenemos y comprobamos que se grabo correctamente el registro:
+
+```json
+{"addresses":[
+    {"id":3,"alias":"supplier"},
+    {"id":4,"alias":"manufacturer"},
+    {"id":14,"alias":"Direccion1"},
+    {"id":1,"alias":"Anonymous"},
+    {"id":5,"alias":"My address"}
+    ]}
+```
+
+Método 2
+--
+
+El metodo dos es mucho más robusto y transparente, realiza algunas actividades sin que tengamos que realizar demasiado codigo y hace muchas más comprobaciones.
+ 
+Primero tenemos que utilizar la función *** add_get() *** 
+
+```python
+result_get = objeto.add_get(resource='addresses')
+```
+
+Este es un objeto mucho más grande que el anterior que solo traia una estructura de datos. Obviamente tardara mucho más en recuperar el objeto.
+
+Tendremos los siguientes componentes 
+
+Veamos el resultado:
+
+* ***struct*** : Este indice contiene todo los datos que vimos antes, recupera la estructura que deberemos completar para enviarlo posteriormente, hay que completarlo dentro del objeto que obtuvimos.
+* ***rules*** : Las reglas en formato de diccionario para poder controlar que este todo bien, este diccionario posteriormente cuando enviemos el objeto nos permitira realizar controles para ver que estemos grabando correctamente el objeto.
+* ***relations*** : Por defecto trae las relaciones, en caso de que no las queramos debemos poner ***rec_id=False*** y no las recuperara. Esto se lo que hace tardar más tiempo a la recuperación de datos. Esto habrá un apartado ("Relations") donde se explique el procedimiento que se utiliza para traer y que datos.
+* ***resource*** : Es simplemente el nombre del recurso que estamos utilizando. Así cuando enviamos el objeto no tenemos que aclarar con que recurso estamos trabajando.
+
+
+
+```python
+{'struct': {'id': '', 
+            'id_customer': '', 
+            'id_manufacturer': '', 
+            'id_supplier': '', 
+            'id_warehouse': '', 
+            'id_country': '', 
+            'id_state': '', 
+            'alias': '', 
+            'company': '', 
+            'lastname': '', 
+            'firstname': '', 
+            'vat_number': '', 
+            'address1': '', 
+            'address2': '', 
+            'postcode': '', 
+            'city': '', 
+            'other': '', 
+            'phone': '', 
+            'phone_mobile': '', 
+            'dni': '', 
+            'deleted': '', 
+            'date_add': '', 
+            'date_upd': ''}, 
+ 'rules': {
+            'id_customer': {'format': 'isNullOrUnsignedId'}, 'id_manufacturer': {'format': 'isNullOrUnsignedId'}, 'id_supplier': {'format': 'isNullOrUnsignedId'}, 'id_warehouse': {'format': 'isNullOrUnsignedId'}, 'id_country': {'required': 'true', 'format': 'isUnsignedId'}, 'id_state': {'format': 'isNullOrUnsignedId'}, 
+            'alias': {'required': 'true', 'maxSize': '32', 'format': 'isGenericName'}, 
+            'company': {'maxSize': '255', 'format': 'isGenericName'}, 'lastname': {'required': 'true', 'maxSize': '255', 'format': 'isName'}, 
+            'firstname': {'required': 'true', 'maxSize': '255', 'format': 'isName'}, 
+            'vat_number': {'format': 'isGenericName'}, 
+            'address1': {'required': 'true', 'maxSize': '128', 'format': 'isAddress'}, 
+            'address2': {'maxSize': '128', 'format': 'isAddress'}, 'postcode': {'maxSize': '12', 'format': 'isPostCode'}, 'city': {'required': 'true', 'maxSize': '64', 'format': 'isCityName'}, 
+            'other': {'maxSize': '300', 'format': 'isMessage'}, 
+            'phone': {'maxSize': '32', 'format': 'isPhoneNumber'}, 'phone_mobile': {'maxSize': '32', 'format': 'isPhoneNumber'}, 'dni': {'maxSize': '16', 'format': 'isDniLite'}, 
+            'deleted': {'format': 'isBool'}, 
+            'date_add': {'format': 'isDate'}, 
+            'date_upd': {'format': 'isDate'}}, 
+ 'relations': {
+                'customers': 
+                {'customers': 
+                    [{'id': 1, 'lastname': 'Anonymous', 'firstname': 'Anonymous'}, 
+                    {'id': 2, 'lastname': 'DOE', 'firstname': 'John'}, {'id': 3, 'lastname': 'Barros', 'firstname': 'Manuel'}]}, 
+                'manufacturers': 
+                    {'manufacturers': [{'id': 1, 'name': 'Studio Design'}, 
+                    {'id': 2, 'name': 'Graphic Corner'}]}, 
+                'suppliers': [], 
+                'warehouses': [], 
+                'countries': 
+                    {'countries':
+                       [{'id': 1, 'name': 'Germany'},
+                        {'id': 2, 'name': 'Austria'}, 
+                        {'id': 3, 'name': 'Belgium'},
+                        {'id': 6, 'name': 'Spain'},
+                        {'id': 7, 'name': 'Finland'}, 
+                        {'id': 8, 'name': 'France'}, 
+                        {'id': 9, 'name': 'Greece'}, 
+                        {'id': 10, 'name': 'Italy'}, 
+                        {'id': 12, 'name': 'Luxemburg'}, 
+                        {'id': 13, 'name': 'Netherlands'}, 
+                        {'id': 14, 'name': 'Poland'}, 
+                        {'id': 15, 'name': 'Portugal'}, 
+                        {'id': 16, 'name': 'Czech Republic'}, 
+                        {'id': 17, 'name': 'United Kingdom'}, 
+                        {'id': 18, 'name': 'Sweden'}, 
+                        {'id': 20, 'name': 'Denmark'}, 
+                        {...}]}},
+ 'resource': 'addresses'}
+```
 
 # PUT (Actualizar)
 

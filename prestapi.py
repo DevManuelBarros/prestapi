@@ -162,6 +162,10 @@ class Prestapi:
                                auth=(self.key,'')
                                )
         response = session.send(req.prepare(), verify=True)
+        self.default_params = {'resource':'',
+                                'id':'',
+                                'schema' : ''}
+        self.clear_headers()
         self.int_params = {}
         return response
 
@@ -339,7 +343,7 @@ class Prestapi:
         #print(struct)
         #ahora vamos por las reglas.
         tStruct = self.get_struct(resource=resource, schema='synopsis', type_json=False)                             #recuperamos
-        tStruct = self.get_rules_dict(tStruct=tStruct.text)         #convertimos a xml el diccionario.
+        tStruct = self.get_rules_dict(tStruct=tStruct)         #convertimos a xml el diccionario.
         tmp = {}                # Creamos un diccionario que utilizaremos.
         relat_id = {}           
         if rec_id == True:      # si es true traera los datos relativos.
@@ -352,10 +356,11 @@ class Prestapi:
         tmp['struct'] = struct 
         tmp['rules'] = tStruct
         tmp['relations'] = relat_id
+        tmp['resource'] = resource
         return tmp
 
 
-    def add(self, resource, data, comp_dat=True):
+    def add(self, data, comp_dat=True):
         """
         ```
         def add: función para agregar un registro.
@@ -365,25 +370,33 @@ class Prestapi:
         ```
         """
         result = ""                     # variable que tendra el resultado de el intento de carga.
-        self.define_json(False)         # definimos que sea archivo de envios xml
-        self.set_params_get(resource)   # definimos que vamos a trabajar con recurso pasado por argumento
         if comp_dat == True:            #Comenzaremos la compración de datos si es TRUE.
             result = self.add_control(data['struct'], data['rules']) #Llamamos a add_control
             if result[0] == False:                                   # si el Resultado es False cortamos la ejecucion y enviamos el error.
                 return result                   #Si hubo error.
         #Comenzamos a trabajar con la parte que importa.
         info = {}
-        info[resource] = data['struct'] #comenzamos a dar el formato que necesita el xml.
-        data = dicttoxml.dicttoxml(info, attr_type=False, custom_root='prestashop') #convertimos en xml
-        result = self.executeRequest(method='POST',data=data) #llamamos a executeRequest para enviar los datos.
+        info[data['resource']] = data['struct'] #comenzamos a dar el formato que necesita el xml.
+        result = self.save(data['resource'], info)
         return result
 
+
+    def save(self, resource, data):
+        self.set_params_get(resource)
+        self.define_json(False)
+        data = dicttoxml.dicttoxml(data, attr_type=False, custom_root='prestashop') #convertimos en xml
+        result = self.executeRequest(method='POST',data=data) #llamamos a executeRequest para enviar los datos.         
+        return result
+    
     #
     #-------------- DELETE -----------------
     #Sector para la eliminación de registro.
     #---------------------------------------
 
-    
+    def clear_headers(self):
+        self.default_headers['Content-type'] = ''
+        self.default_headers['Io-Format'] = ''
+        self.default_headers['Output-Format'] = ''
         
     def delete(self, resource, id):
         """
@@ -394,11 +407,13 @@ class Prestapi:
         return boolean, str
         ```
         """
-        self.set_params_get(resource=resource, id=str(id))
+        self.clear_headers()
+        self.set_params_get(resource=resource, id=str(id), schema='')
         result = self.executeRequest(method='DELETE')
         msg = self.checkStatusCode(result.status_code)
         if result.status_code == 200:
             return True, msg
+
         return False, msg
 
 
