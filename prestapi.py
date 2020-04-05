@@ -244,55 +244,16 @@ class Prestapi:
     #-----------------------------------
 
 
-    """
-    def get_id_name : funcion para recuperar datos de ID y NAME (o nombre elegido en diccionario.)
-    ---
-    \n
-    @resource : (str) nombre del recurso.
-    @name     : (str) nombre de campos a devolver.
-    """
-    def get_id_name(self, resource, name):
-        update = True
-        self.define_json() #definimos el tipo de pedido que vamos a realizar
-        self.set_params_get(resource=resource)
-        rec = self.executeRequest()
-        if len(rec.json()) > 0:
-            rec = rec.json()[resource]
+    def g_id_name(self, resource, name):
+        result = {}
+        if name == 'None':
+            return  {'id' : None}
         else:
-            update = False
-        if update == True:
-            path = self.dir_cache + resource + ".json"
-            if os.path.isfile(path):
-                cmp_json = json.load(open(path, "r"))
-                if cmp_json == rec:
-                    update = False
-                else:
-                    file_object = open(path, "w")
-                    json.dump(rec, file_object)
-            else:
-                file_object = open(path, "w")
-                json.dump(rec, file_object)
-            path_detail = self.dir_cache + resource + "Detail" + ".json"
-            if update:
-                id_name = {}
-                for ix in rec:
-                    self.set_params_get(resource=resource, id=str(ix['id']))
-                    new_rec = self.executeRequest().json()
-                    if "," in name:
-                        fullName = ""
-                        arrayName = name.split(",")
-                        for tmpName in arrayName:
-                            fullName += new_rec[str(list(new_rec)[0])][tmpName] + " "
-                        id_name[str(ix['id'])] = fullName[:-1]    
-                    else:    
-                        id_name[str(ix['id'])] = new_rec[str(list(new_rec)[0])][name]
-                file_object = open(path_detail, "w")
-                json.dump(id_name, file_object)
-            else:
-                id_name = json.load(open(path_detail, "r"))
-        else:
-            id_name = {'1' : 'No data found'}
-        return id_name
+            self.define_json()
+            self.set_params_get(resource=resource)
+            self.display_params(display=name)
+            result = self.executeRequest()
+        return result.json()
 
     """
     def get_rules_dict:  convertiremos xml en diccionario para 
@@ -352,27 +313,32 @@ class Prestapi:
             #Aqui es que se encontraron errores.
             return False, msgError     
 
-
-    """
-    def add_get : esto devolvera un diccionario con tres fases, \n
-    1) struct    : la estructura a completar. 
-    2) rules     : las reglas si son requeridas o que. (Esto se realiza aquí porque si se quiere utilizar para antes de hacerlo en segunda instancia.)
-    3) relations : esto dependera de rec_id si esta en True, completara las relaciones correspondientes a cada uno. 
-    ---
-    \n
-    @resource : (string) recurso con el que vamos a trabajar.
-    @rec_id   : (boolean) si se recuperan las relaciones para luego poder utilizarlas.
-    """
+    def get_struct(self, resource, schema='blank', type_json=True):
+        self.define_json(type_json=type_json)
+        self.set_params_get(resource=resource, schema=schema)
+        struct = self.executeRequest()
+        if type_json == True:
+            return struct.json()
+        return struct.text
+    
     def add_get(self, resource, rec_id=True):
+        """
+        ```
+        def add_get : esto devolvera un diccionario con tres fases,
+        1) struct    : la estructura a completar. (JSON)
+        2) rules     : las reglas si son requeridas o que. (Esto se realiza aquí porque si se quiere utilizar para antes de hacerlo en segunda instancia.)
+        3) relations : esto dependera de rec_id si esta en True, completara las relaciones correspondientes a cada uno. 
+        ---
+        @resource : (string) recurso con el que vamos a trabajar.
+        @rec_id   : (boolean) si se recuperan las relaciones para luego poder utilizarlas.
+        ```
+        """
         #primero trabajaremos con la estructura.
-        self.define_json()                                      #definimos la cabecera por json()
-        self.set_params_get(resource=resource, schema='blank')  #definimos los parametros, para traer la estructura
-        struct = self.executeRequest().json()                   #traemos los datos.
+        struct = self.get_struct(resource=resource)   #traemos los datos.
         struct = struct[list(struct)[0]]                        #traemos la primer key del diccionario
+        #print(struct)
         #ahora vamos por las reglas.
-        self.define_json(type_json=False)                           #aquí trabajaremos con xml.   
-        self.set_params_get(resource=resource, schema='synopsis')   #seteamos parametros
-        tStruct = self.executeRequest()                             #recuperamos
+        tStruct = self.get_struct(resource=resource, schema='synopsis', type_json=False)                             #recuperamos
         tStruct = self.get_rules_dict(tStruct=tStruct.text)         #convertimos a xml el diccionario.
         tmp = {}                # Creamos un diccionario que utilizaremos.
         relat_id = {}           
@@ -381,21 +347,23 @@ class Prestapi:
             for field_struct in struct:             #Recurremos la estructura para comprobar cada campo si es de relacion o no.
                 if "id_" == field_struct[:3]:       #Si comienza en id_ tenemos un campo relacionado.
                     values = rel.relations[field_struct] #Buscamos los valores. nombre recurso, y valor
-                    relat_id[values[0]] = self.get_id_name(resource=values[0],name=values[1])
+                    relat_id[values[0]] = self.g_id_name(resource=values[0],name=values[1])
         #Completamos todos los datos de la estructura.
         tmp['struct'] = struct 
         tmp['rules'] = tStruct
         tmp['relations'] = relat_id
         return tmp
 
-    """
-    def add: función para agregar un registro.
-    \n
-    @resource : (string) nombre del recurso al que deseamos acceder.
-    @data : (dict) debe devolverse el diccionario completo.
-    comp_dat : (boolean) Si se comprobaran los datos.  
-    """
+
     def add(self, resource, data, comp_dat=True):
+        """
+        ```
+        def add: función para agregar un registro.
+        @resource : (string) nombre del recurso al que deseamos acceder.
+        @data : (dict) debe devolverse el diccionario completo.
+        @comp_dat : (boolean) Si se comprobaran los datos.  
+        ```
+        """
         result = ""                     # variable que tendra el resultado de el intento de carga.
         self.define_json(False)         # definimos que sea archivo de envios xml
         self.set_params_get(resource)   # definimos que vamos a trabajar con recurso pasado por argumento
@@ -435,11 +403,14 @@ class Prestapi:
 
 
 
-    """
-    def fun : Esta funcion simplemente es el esquema para poder personalizar cada
-    una de las comprobaciones.
-    """
+    
     def fun(self):
+        """
+        ```
+        def fun : Esta funcion simplemente es el esquema para poder personalizar cada
+        una de las comprobaciones.
+        ```
+        """
         # lo que se debe tomar el self.line_for_format para comprobar como 
         #string de comprabacion
         #self.line_for_format
